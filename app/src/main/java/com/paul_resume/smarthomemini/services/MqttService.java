@@ -4,9 +4,9 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.nfc.Tag;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
@@ -26,9 +26,12 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
  */
 public class MqttService extends Service implements MqttCallback{
 
-    public static final String TAG = "";
-    public static final String ACTION_PUBLISH = MqttService.class.getName() + "Action.Publish",
+    public static final String TAG = MqttService.class.getName();
+    public static final String ACTIION_NETWORK_CHANGE = MqttService.class.getName() + "Action.Network",
+            ACTION_PUBLISH = MqttService.class.getName() + "Action.Publish",
             EXTRA_MESSAGE = MqttService.class.getName() + "Extra.Message";
+
+    private static final int KEEP_ALIVE = 20 * 60;
 
     MqttClient client = null;
     MqttConnectOptions options = null;
@@ -36,30 +39,12 @@ public class MqttService extends Service implements MqttCallback{
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate()");
         super.onCreate();
         settings = new AppSettings(getApplicationContext());
-        try{
-            if(isDeviceConnected()){
-                if(!settings.getBroker().isEmpty()){
-                    client = new MqttClient(settings.getBroker() , Settings.Secure.ANDROID_ID ,
-                            new MemoryPersistence());
-
-                    if(!settings.getUser().isEmpty() || !settings.getPass().isEmpty()){
-                        options.setUserName(settings.getUser());
-                        options.setPassword(settings.getPass().toCharArray());
-                        options.setKeepAliveInterval(20 * 60);
-                        client.connect();
-                    }
-
-                } else {
-                    Log.d(TAG , "Broker not set !");
-                }
-            } else {
-                Log.d(TAG , "Device is not connected to the internet !");
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
+        serviceConnect();
+        registerReceiver(new NetworkChangeBroadcast(),
+                new IntentFilter(ACTIION_NETWORK_CHANGE));
     }
 
     @Override
@@ -93,10 +78,58 @@ public class MqttService extends Service implements MqttCallback{
     }
 
     public boolean isDeviceConnected(){
-        ConnectivityManager manager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        ConnectivityManager manager = (ConnectivityManager) getApplicationContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = manager.getActiveNetworkInfo();
-        boolean isConnected = info != null || info.isConnected();
+        boolean isConnected = false;
+        try {
+            isConnected = info != null && info.isConnected();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
         return isConnected;
+    }
+
+    public void serviceConnect() {
+        Log.d(TAG, "Calling serviceConnect()");
+        try {
+            if (isDeviceConnected()) {
+                if (!settings.getBroker().isEmpty()) {
+                    client = new MqttClient(settings.getBroker(), Settings.Secure.ANDROID_ID,
+                            new MemoryPersistence());
+
+                    options = new MqttConnectOptions();
+
+                    if (!settings.getUser().isEmpty() || !settings.getPass().isEmpty()) {
+                        options.setUserName(settings.getUser());
+                        options.setPassword(settings.getPass().toCharArray());
+                        options.setKeepAliveInterval(20 * 60);
+                        client.connect(options);
+                    } else {
+                        options.setKeepAliveInterval(KEEP_ALIVE);
+                        client.connect(options);
+                    }
+
+                } else {
+                    Log.d(TAG, "Broker not set !");
+                }
+            } else {
+                Log.d(TAG, "Device is not connected to the internet !");
+            }
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void serviceDisconnect() {
+        Log.d(TAG, "Calling serviceDisconnect()");
+        try {
+            if (client != null && client.isConnected()) {
+                client.disconnect();
+            }
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
     }
 
     public class PublishReceiver extends BroadcastReceiver{
@@ -124,6 +157,19 @@ public class MqttService extends Service implements MqttCallback{
         @Override
         public void onReceive(Context context, Intent intent) {
 
+        }
+    }
+
+    public class NetworkChangeBroadcast extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Network Change Receiver");
+            if (isDeviceConnected()) {
+                serviceDisconnect();
+                serviceConnect();
+            } else {
+                serviceDisconnect();
+            }
         }
     }
 }
