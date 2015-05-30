@@ -67,6 +67,7 @@ public class MqttService extends Service implements MqttCallback{
     @Override
     public void onDestroy() {
         super.onDestroy();
+        serviceDisconnect();
     }
 
     @Override
@@ -169,6 +170,7 @@ public class MqttService extends Service implements MqttCallback{
                 client.publish("/paul/relays", message);
             } catch (MqttException e) {
                 e.printStackTrace();
+                Log.d(TAG, e.getCause().toString());
             }
         }
     }
@@ -210,6 +212,7 @@ public class MqttService extends Service implements MqttCallback{
     public class SettingsReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Settings Change Receiver");
             if (isDeviceConnected()) {
                 serviceDisconnect();
                 serviceConnect();
