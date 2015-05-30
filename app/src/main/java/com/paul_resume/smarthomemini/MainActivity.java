@@ -1,5 +1,6 @@
 package com.paul_resume.smarthomemini;
 
+import android.app.ActivityManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,6 +20,15 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        /**
+         * Check if service is already running
+         * if not than start the service
+         */
+        if (!isServiceRunning(MqttService.class.getName().toString())) {
+            Intent service = new Intent(MainActivity.this, MqttService.class);
+            startService(service);
+        }
 
         final AppSettings settings = new AppSettings(this);
 
@@ -103,7 +113,34 @@ public class MainActivity extends ActionBarActivity {
             startActivity(i);
         }
 
+        if (id == R.id.action_start_service) {
+            Intent i = new Intent(MainActivity.this, MqttService.class);
+            startService(i);
+        }
+
+        if (id == R.id.action_stop_service) {
+            Intent i = new Intent(MainActivity.this, MqttService.class);
+            stopService(i);
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Check if service is running
+     *
+     * @param serviceName
+     * @return
+     */
+    private boolean isServiceRunning(String serviceName) {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (service.getClass().getName().equals(serviceName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
