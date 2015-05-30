@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.paul_resume.smarthomemini.services.MqttService;
 
@@ -18,8 +19,8 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = new Intent(this, MqttService.class);
-        startService(intent);
+
+        final AppSettings settings = new AppSettings(this);
 
         /**
          * Get all views
@@ -35,21 +36,42 @@ public class MainActivity extends ActionBarActivity {
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (!settings.getMessage1().isEmpty()) {
+                    Intent i = new Intent(MqttService.ACTION_PUBLISH);
+                    i.putExtra(MqttService.EXTRA_MESSAGE, settings.getMessage1());
+                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(i);
+                    Toast.makeText(MainActivity.this, "Sending message", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "No messegae set for this button", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (!settings.getMessage2().isEmpty()) {
+                    Intent i = new Intent(MqttService.ACTION_PUBLISH);
+                    i.putExtra(MqttService.EXTRA_MESSAGE, settings.getMessage2());
+                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(i);
+                    Toast.makeText(MainActivity.this, "Sending message", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "No messegae set for this button", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (!settings.getMessage3().isEmpty()) {
+                    Intent i = new Intent(MqttService.ACTION_PUBLISH);
+                    i.putExtra(MqttService.EXTRA_MESSAGE, settings.getMessage3());
+                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(i);
+                    Toast.makeText(MainActivity.this, "Sending message", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "No messegae set for this button", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -77,7 +99,8 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            Intent i = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(i);
         }
 
         return super.onOptionsItemSelected(item);

@@ -1,0 +1,131 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.paul_resume.smarthomemini.SettingsActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="MQTT Borker"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/txtBroker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="tcp://broker.domain.com:1883"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtUsername" />
+
+            <EditText
+                android:id="@id/txtUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Username"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtPassword" />
+
+            <EditText
+                android:id="@id/txtPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:nextFocusDown="@+id/txtTopic" />
+
+            <EditText
+                android:id="@id/txtTopic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Topic"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtMessage1" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:text="MQTT Messages"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@id/txtMessage1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Button 1"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtMessage2" />
+
+            <EditText
+                android:id="@id/txtMessage2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Button 2"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtMessage3" />
+
+            <EditText
+                android:id="@id/txtMessage3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Button 3"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtWifiSSID" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:text="WiFi Presence"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@id/txtWifiSSID"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="WiFi SSID"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtWifiConnect" />
+
+            <EditText
+                android:id="@id/txtWifiConnect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="WiFi onConnect"
+                android:inputType="text"
+                android:nextFocusDown="@+id/txtWifiDisconnect" />
+
+            <EditText
+                android:id="@id/txtWifiDisconnect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="WiFi onDisconnect"
+                android:inputType="text" />
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save settings" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
