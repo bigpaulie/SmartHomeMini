@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 import com.paul_resume.smarthomemini.services.MqttService;
 
@@ -95,11 +96,19 @@ public class AppSettings {
         editor.putString(SETTING_MQTT_MESSAGE3, message);
     }
 
+    /**
+     * Commit settings
+     */
     public void commit(){
         editor.commit();
         sendBroadcast();
+        // Show a toast message indicating that the settings are beeing saved
+        Toast.makeText(context, "Savaing settings ...", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Broadcast settings change event
+     */
     public void sendBroadcast() {
         Intent intent = new Intent(MqttService.ACTION_SETTINGS_CHANGE);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
