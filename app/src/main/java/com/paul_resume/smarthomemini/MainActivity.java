@@ -1,7 +1,10 @@
 package com.paul_resume.smarthomemini;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
@@ -91,6 +94,10 @@ public class MainActivity extends ActionBarActivity {
 
             }
         });
+
+        // Register Broadcast receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(new ToastReceiver(),
+                new IntentFilter(MqttService.ACTION_TOAST));
     }
 
     @Override
@@ -150,5 +157,13 @@ public class MainActivity extends ActionBarActivity {
         Intent intent = new Intent(action);
         intent.putExtra(MqttService.EXTRA_MESSAGE, message);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    public class ToastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(MainActivity.this, intent.getStringExtra(MqttService.EXTRA_MESSAGE),
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }
