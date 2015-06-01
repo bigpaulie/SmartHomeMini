@@ -175,6 +175,7 @@ public class MqttService extends Service implements MqttCallback{
                     Intent i = new Intent(ACTION_TOAST);
                     i.putExtra(EXTRA_MESSAGE, "Client is not connected to MQTT Broker ...");
                     LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+
                 }
             } catch (MqttException e) {
                 e.printStackTrace();
