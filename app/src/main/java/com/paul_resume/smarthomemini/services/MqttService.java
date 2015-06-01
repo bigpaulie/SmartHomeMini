@@ -31,6 +31,7 @@ public class MqttService extends Service implements MqttCallback{
     public static final String ACTIION_NETWORK_CHANGE = MqttService.class.getName() + "Action.Network",
             ACTION_PUBLISH = MqttService.class.getName() + "Action.Publish",
             ACTION_SETTINGS_CHANGE = MqttService.class.getName() + "Action.SettingsChange",
+            ACTION_TOAST = MqttService.class.getName() + "Action.Toast",
             EXTRA_MESSAGE = MqttService.class.getName() + "Extra.Message";
 
     private static final int KEEP_ALIVE = 20 * 60;
@@ -167,7 +168,14 @@ public class MqttService extends Service implements MqttCallback{
             Log.d(TAG, "PublishReceiver onReceive()");
             MqttMessage message = new MqttMessage(intent.getStringExtra(EXTRA_MESSAGE).getBytes());
             try {
-                client.publish("/paul/relays", message);
+                if (client != null && client.isConnected()) {
+                    client.publish(settings.getTopic(), message);
+                } else {
+                    Log.d(TAG, "Client is not connected to " + settings.getBroker());
+                    Intent i = new Intent(ACTION_TOAST);
+                    i.putExtra(EXTRA_MESSAGE, "Client is not connected to MQTT Broker ...");
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+                }
             } catch (MqttException e) {
                 e.printStackTrace();
                 Log.d(TAG, e.getCause().toString());
