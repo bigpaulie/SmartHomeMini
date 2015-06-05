@@ -21,14 +21,19 @@ public class AppSettings {
             SETTING_MQTT_TOPIC = "TOPIC",
             SETTING_MQTT_MESSAGE1 = "MESSAGE1",
             SETTING_MQTT_MESSAGE2 = "MESSAGE2",
-            SETTING_MQTT_MESSAGE3 = "MESSAGE3";
+            SETTING_MQTT_MESSAGE3 = "MESSAGE3",
+            SETTING_WIFI_PRESENCE_ENABLE = "WIFIPRESENCE",
+            SETTING_WIFI_SSID = "WIFISSID",
+            SETTING_WIFI_CONNECT = "WIFICONNECT",
+            SETTING_WIFI_DISCONNECT = "WIFIDISCONNECT";
+
     Context context;
     SharedPreferences preferences = null;
     SharedPreferences.Editor editor = null;
 
     public AppSettings(Context context) {
         this.context = context;
-        preferences = context.getSharedPreferences(PACKAGE , Context.MODE_PRIVATE);
+        preferences = context.getSharedPreferences(PACKAGE, Context.MODE_PRIVATE);
         editor = preferences.edit();
     }
 
@@ -36,8 +41,8 @@ public class AppSettings {
         return preferences.getString(SETTING_MQTT_BROKER, "");
     }
 
-    public void setBroker(String broker){
-        editor.putString(SETTING_MQTT_BROKER , broker);
+    public void setBroker(String broker) {
+        editor.putString(SETTING_MQTT_BROKER, broker);
     }
 
     public Integer getPort() {
@@ -60,8 +65,8 @@ public class AppSettings {
         return preferences.getString(SETTING_MQTT_PASS, "");
     }
 
-    public void setPass(String pass){
-        editor.putString(SETTING_MQTT_PASS , pass);
+    public void setPass(String pass) {
+        editor.putString(SETTING_MQTT_PASS, pass);
     }
 
     public String getTopic() {
@@ -96,14 +101,50 @@ public class AppSettings {
         editor.putString(SETTING_MQTT_MESSAGE3, message);
     }
 
+    public boolean getWifiPresence() {
+        return preferences.getBoolean(SETTING_WIFI_PRESENCE_ENABLE, false);
+    }
+
+    public void setWifiPresence(boolean wifiPresence) {
+        editor.putBoolean(SETTING_WIFI_PRESENCE_ENABLE, wifiPresence);
+    }
+
+    public String getWifiSSID() {
+        return preferences.getString(SETTING_WIFI_SSID, "");
+    }
+
+    public void setWifiSSID(String ssid) {
+        editor.putString(SETTING_WIFI_SSID, ssid);
+    }
+
+    public String getWifiConnectMessage() {
+        return preferences.getString(SETTING_WIFI_CONNECT, "");
+    }
+
+    public void setWifiConnectMessage(String message) {
+        editor.putString(SETTING_WIFI_CONNECT, message);
+    }
+
+    public String getWifiDisconnectMessage() {
+        return preferences.getString(SETTING_WIFI_DISCONNECT, "");
+    }
+
+    public void setWifiDisconnectMessage(String message) {
+        editor.putString(SETTING_WIFI_DISCONNECT, message);
+    }
+
     /**
      * Commit settings
+     *
+     * @param showToast boolean
      */
-    public void commit(){
+    public void commit(boolean showToast) {
         editor.commit();
         sendBroadcast();
         // Show a toast message indicating that the settings are beeing saved
-        Toast.makeText(context, "Savaing settings ...", Toast.LENGTH_SHORT).show();
+        if (showToast) {
+            Toast.makeText(context, "Savaing settings ...", Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**

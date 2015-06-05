@@ -6,7 +6,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 
 
 public class SettingsActivity extends ActionBarActivity {
@@ -30,9 +32,10 @@ public class SettingsActivity extends ActionBarActivity {
         final EditText message2 = (EditText) findViewById(R.id.txtMessage2);
         final EditText message3 = (EditText) findViewById(R.id.txtMessage3);
 
-        EditText wifi_ssid = (EditText) findViewById(R.id.txtWifiSSID);
-        EditText wifi_onconnect = (EditText) findViewById(R.id.txtWifiConnect);
-        EditText wifi_ondisconnect = (EditText) findViewById(R.id.txtWifiDisconnect);
+        final EditText wifi_ssid = (EditText) findViewById(R.id.txtWifiSSID);
+        final EditText wifi_onconnect = (EditText) findViewById(R.id.txtWifiConnect);
+        final EditText wifi_ondisconnect = (EditText) findViewById(R.id.txtWifiDisconnect);
+        final Switch wifi_switch = (Switch) findViewById(R.id.swWifi);
 
         Button save = (Button) findViewById(R.id.btnSave);
         save.setOnClickListener(new View.OnClickListener() {
@@ -45,8 +48,25 @@ public class SettingsActivity extends ActionBarActivity {
                 settings.setMessage1(message1.getText().toString());
                 settings.setMessage2(message2.getText().toString());
                 settings.setMessage3(message3.getText().toString());
+                settings.setWifiSSID(wifi_ssid.getText().toString());
+                settings.setWifiConnectMessage(wifi_onconnect.getText().toString());
+                settings.setWifiDisconnectMessage(wifi_ondisconnect.getText().toString());
 
-                settings.commit();
+                settings.commit(true);
+            }
+        });
+
+        /**
+         * Set the switch checked mode
+         * set OnCheckedChangeListener
+         */
+        wifi_switch.setChecked(settings.getWifiPresence());
+        wifi_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                settings.setWifiPresence(isChecked);
+                settings.commit(false);
+                wifi_switch.setChecked(isChecked);
             }
         });
 

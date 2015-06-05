@@ -22,6 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="MQTT Borker"
+                android:textSize="@dimen/activity_settings_titles"
                 android:textStyle="bold" />
 
             <EditText
@@ -62,6 +63,7 @@
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
                 android:text="MQTT Messages"
+                android:textSize="@dimen/activity_settings_titles"
                 android:textStyle="bold" />
 
             <EditText
@@ -88,13 +90,30 @@
                 android:inputType="text"
                 android:nextFocusDown="@+id/txtWifiSSID" />
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"
-                android:text="WiFi Presence"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="3"
+                    android:gravity="start"
+                    android:text="WiFi Presence"
+                    android:textSize="@dimen/activity_settings_titles"
+                    android:textStyle="bold" />
+
+                <Switch
+                    android:id="@+id/swWifi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end" />
+
+            </LinearLayout>
 
             <EditText
                 android:id="@id/txtWifiSSID"

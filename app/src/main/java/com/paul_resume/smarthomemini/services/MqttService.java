@@ -25,7 +25,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 /**
  * Created by paul on 29.05.2015.
  */
-public class MqttService extends Service implements MqttCallback{
+public class MqttService extends Service implements MqttCallback {
 
     public static final String TAG = MqttService.class.getName();
     public static final String ACTIION_NETWORK_CHANGE = MqttService.class.getName() + "Action.Network",
@@ -44,20 +44,34 @@ public class MqttService extends Service implements MqttCallback{
     public void onCreate() {
         Log.d(TAG, "onCreate()");
         super.onCreate();
+
+        /**
+         * Get the user defined settings
+         */
         settings = new AppSettings(getApplicationContext());
+
+        /**
+         * Attempt to connect to the MQTT Server
+         */
         serviceConnect();
 
         /**
          * Register Broadcast Receivers
          */
-        LocalBroadcastManager.getInstance(getApplicationContext())
-                .registerReceiver(new NetworkChangeReceiver(), new IntentFilter(ACTIION_NETWORK_CHANGE));
+        registerReceiver(new NetworkChangeReceiver(), ACTIION_NETWORK_CHANGE);
+        registerReceiver(new PublishReceiver(), ACTION_PUBLISH);
+        registerReceiver(new SettingsReceiver(), ACTION_SETTINGS_CHANGE);
+    }
 
-        LocalBroadcastManager.getInstance(getApplicationContext())
-                .registerReceiver(new PublishReceiver(), new IntentFilter(ACTION_PUBLISH));
-
-        LocalBroadcastManager.getInstance(getApplicationContext())
-                .registerReceiver(new SettingsReceiver(), new IntentFilter(ACTION_SETTINGS_CHANGE));
+    /**
+     * Register Broadcast receivers
+     *
+     * @param receiver
+     * @param Filter
+     */
+    public void registerReceiver(BroadcastReceiver receiver, String Filter) {
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(receiver,
+                new IntentFilter(Filter));
     }
 
     @Override
@@ -97,7 +111,7 @@ public class MqttService extends Service implements MqttCallback{
         return android_id;
     }
 
-    public boolean isDeviceConnected(){
+    public boolean isDeviceConnected() {
         Log.d(TAG, "Calling isDeviceConnected()");
         ConnectivityManager manager = (ConnectivityManager) getApplicationContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -130,10 +144,12 @@ public class MqttService extends Service implements MqttCallback{
                         options.setKeepAliveInterval(KEEP_ALIVE);
                         client.setCallback(this);
                         client.connect(options);
+                        client.subscribe(settings.getTopic());
                     } else {
                         options.setKeepAliveInterval(KEEP_ALIVE);
                         client.setCallback(this);
                         client.connect(options);
+                        client.subscribe(settings.getTopic());
                     }
 
                     if (client.isConnected()) {
@@ -162,7 +178,7 @@ public class MqttService extends Service implements MqttCallback{
         }
     }
 
-    public class PublishReceiver extends BroadcastReceiver{
+    public class PublishReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "PublishReceiver onReceive()");
