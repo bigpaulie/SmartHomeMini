@@ -1,5 +1,7 @@
 package com.paul_resume.smarthomemini.services;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,6 +10,7 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -20,6 +23,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 /**
@@ -30,6 +34,7 @@ public class MqttService extends Service implements MqttCallback {
     public static final String TAG = MqttService.class.getName();
     public static final String ACTIION_NETWORK_CHANGE = MqttService.class.getName() + "Action.Network",
             ACTION_PUBLISH = MqttService.class.getName() + "Action.Publish",
+            ACTION_PING = MqttService.class.getName() + "Action.Ping",
             ACTION_SETTINGS_CHANGE = MqttService.class.getName() + "Action.SettingsChange",
             ACTION_TOAST = MqttService.class.getName() + "Action.Toast",
             EXTRA_MESSAGE = MqttService.class.getName() + "Extra.Message";
@@ -39,6 +44,21 @@ public class MqttService extends Service implements MqttCallback {
     MqttClient client = null;
     MqttConnectOptions options = null;
     AppSettings settings = null;
+    PowerManager powerManager = null;
+    AlarmManager alarmManager = null;
+    private PowerManager.WakeLock wakeLock = null;
+
+    /**
+     * Ping intent keep connection alive
+     *
+     * @param context
+     * @return
+     */
+    public static Intent pingIntent(Context context) {
+        Intent intent = new Intent(context, MqttService.class);
+        intent.setAction(ACTION_PING);
+        return intent;
+    }
 
     @Override
     public void onCreate() {
@@ -76,6 +96,31 @@ public class MqttService extends Service implements MqttCallback {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        wakeLock.acquire();
+
+        if (intent != null || intent.getAction().equals(ACTION_PING)) {
+            if (client == null || !client.isConnected()) {
+                serviceConnect();
+            } else {
+                try {
+                    client.publish(settings.getTopic(), new MqttMessage("PING".getBytes()));
+                } catch (MqttPersistenceException e) {
+                    e.printStackTrace();
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        PendingIntent pendingIntent = PendingIntent.getService(this, 0, MqttService.pingIntent(this),
+                PendingIntent.FLAG_NO_CREATE);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                AlarmManager.INTERVAL_HALF_HOUR, pendingIntent);
+
+        wakeLock.release();
         return START_STICKY;
     }
 
