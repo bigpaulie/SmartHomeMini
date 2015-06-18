@@ -1,6 +1,7 @@
 package com.paul_resume.smarthomemini.services;
 
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -12,6 +13,7 @@ import android.net.NetworkInfo;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -133,11 +135,31 @@ public class MqttService extends Service implements MqttCallback {
     @Override
     public void connectionLost(Throwable throwable) {
         Log.d(TAG, "Connection lost !");
+        /**
+         * Wake the CPU and reconnect to the MQTT Server
+         * !!! release the wake look asap !.
+         */
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        wakeLock.acquire();
+        serviceConnect();
+        wakeLock.release();
     }
 
     @Override
-    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+    public void messageArrived(String topic, MqttMessage mqttMessage) {
+        Log.d(TAG, topic);
+        try {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
+            builder.setContentTitle("Smart Home Mini Alert");
+            builder.setContentText(mqttMessage.toString());
 
+            int notificationID = 001;
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            manager.notify(notificationID, builder.build());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -190,11 +212,13 @@ public class MqttService extends Service implements MqttCallback {
                         client.setCallback(this);
                         client.connect(options);
                         client.subscribe(settings.getTopic());
+                        client.subscribe("/paul/alerts");
                     } else {
                         options.setKeepAliveInterval(KEEP_ALIVE);
                         client.setCallback(this);
                         client.connect(options);
                         client.subscribe(settings.getTopic());
+                        client.subscribe("/paul/alerts");
                     }
 
                     if (client.isConnected()) {
@@ -245,37 +269,20 @@ public class MqttService extends Service implements MqttCallback {
         }
     }
 
-    public class MessageReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
-
-    public class DeliveryReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
-
-    public class ConnetionLostReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-        }
-    }
-
     public class NetworkChangeReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "Network Change Receiver");
+            powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            wakeLock.acquire();
             if (isDeviceConnected()) {
                 serviceDisconnect();
                 serviceConnect();
             } else {
                 serviceDisconnect();
             }
+            wakeLock.release();
         }
     }
 
