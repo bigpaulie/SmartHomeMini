@@ -102,18 +102,24 @@ public class MqttService extends Service implements MqttCallback {
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         wakeLock.acquire();
 
-        if (intent != null || intent.getAction().equals(ACTION_PING)) {
-            if (client == null || !client.isConnected()) {
-                serviceConnect();
-            } else {
-                try {
-                    client.publish(settings.getTopic(), new MqttMessage("PING".getBytes()));
-                } catch (MqttPersistenceException e) {
-                    e.printStackTrace();
-                } catch (MqttException e) {
-                    e.printStackTrace();
+        try {
+            if (intent != null || intent.getAction().equals(ACTION_PING)) {
+                if (client == null || !client.isConnected()) {
+                    serviceConnect();
+                } else {
+                    try {
+                        client.publish(settings.getTopic(), new MqttMessage("PINGREQ".getBytes()));
+                    } catch (MqttPersistenceException e) {
+                        e.printStackTrace();
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
 
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
