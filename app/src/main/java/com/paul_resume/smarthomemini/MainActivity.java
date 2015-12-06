@@ -24,16 +24,19 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final AppSettings settings = new AppSettings(this);
+
         /**
          * Check if service is already running
          * if not than start the service
          */
-        if (!isServiceRunning(MqttService.class.getName().toString())) {
-            Intent service = new Intent(MainActivity.this, MqttService.class);
-            startService(service);
+        if (settings.getFirstRun()) {
+            if (!isServiceRunning(MqttService.class.getName().toString())) {
+                Intent service = new Intent(MainActivity.this, MqttService.class);
+                startService(service);
+                settings.setFirstRun(false);
+            }
         }
-
-        final AppSettings settings = new AppSettings(this);
 
         /**
          * Get all views

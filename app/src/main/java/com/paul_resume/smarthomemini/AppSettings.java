@@ -14,6 +14,7 @@ import com.paul_resume.smarthomemini.services.MqttService;
 public class AppSettings {
 
     private static final String PACKAGE = "com.paul_resume.smarthomemini.settings",
+            SETTING_APP_FIRTSRUN = "FIRSTRUN",
             SETTING_MQTT_BROKER = "BROKER",
             SETTING_MQTT_PORT = "PORT",
             SETTING_MQTT_USER = "USER",
@@ -131,6 +132,27 @@ public class AppSettings {
 
     public void setWifiDisconnectMessage(String message) {
         editor.putString(SETTING_WIFI_DISCONNECT, message);
+    }
+
+    /**
+     * Get APP first run
+     * Used to check if the app has recently been installed
+     * and the MQTT service needs to be started
+     *
+     * @return
+     */
+    public Boolean getFirstRun() {
+        return preferences.getBoolean(SETTING_APP_FIRTSRUN, true);
+    }
+
+    /**
+     * Set APP first run
+     * Used to start the MQTT service for the first time
+     *
+     * @param firstRun
+     */
+    public void setFirstRun(Boolean firstRun) {
+        editor.putBoolean(SETTING_APP_FIRTSRUN, firstRun);
     }
 
     /**
