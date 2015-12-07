@@ -35,6 +35,7 @@ public class MainActivity extends ActionBarActivity {
                 Intent service = new Intent(MainActivity.this, MqttService.class);
                 startService(service);
                 settings.setFirstRun(false);
+                settings.commit(false);
             }
         }
 
